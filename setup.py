@@ -12,9 +12,9 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='flaskKafka',
-    version='0.0.3',
-    packages=['flaskKafka'],
+    name='flask-kafka-python',
+    version='0.0.1',
+    packages=['flask_kafka'],
     install_requires=['kafka-python'],
     license='MIT',
     description='Make it easier to integrate flask with kafka',
@@ -25,4 +25,6 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/cookieGeGe/flask-kafka-python",
     include_package_data=True,
+    python_requires='>=3.6',
+    platforms='any',
 )

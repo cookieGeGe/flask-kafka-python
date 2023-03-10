@@ -2,12 +2,14 @@
 # @Time    : 2023/3/9-14:38
 # @Author  : 灯下客
 # @Email   : 
-# @File    : FlaskKafka.py
+# @File    : flask_kafka.py
 # @Software: PyCharm
+import atexit
+import os
+import platform
 import threading
-from typing import Dict
+from typing import Dict, Callable
 
-from flask import Flask
 from .consumer import KafkaConsumer
 from .producer import KafkaProducer
 
@@ -21,7 +23,7 @@ class FlaskKafka(object):
         if app is not None:
             self.init_app(app)
 
-    def init_app(self, app: Flask):
+    def init_app(self, app):
         self.app = app
         if "kafka" in self.app.extensions:
             raise RuntimeError(
@@ -52,10 +54,10 @@ class FlaskKafka(object):
             raise Exception(f"must be {KafkaConsumer.__class__}")
         self._consumers[consumer_name] = consumer
 
-    def create_consumer(self, consumer_name, **config):
-        self.add_consumer(consumer_name, KafkaConsumer(**config))
+    def create_consumer(self, consumer_name: str, **config):
+        self.add_consumer(consumer_name, KafkaConsumer(self.app, **config))
 
-    def create_producer(self, producer_name, **config):
+    def create_producer(self, producer_name: str, **config):
         self.add_producer(producer_name, KafkaProducer(**config))
 
     def add_producer(self, producer_name: str, producer: KafkaProducer):
@@ -67,13 +69,13 @@ class FlaskKafka(object):
             raise Exception(f"must be {KafkaProducer.__class__}")
         self._producers[producer_name] = producer
 
-    def topic_handler(self, topic, consumer: str = "default"):
+    def topic_handler(self, topic: str, consumer: str = "default"):
         consumer_obj = self.get_consumer(consumer)
         if consumer_obj is None:
             raise Exception(f"name {consumer} Consumer not registered")
         return consumer_obj.handle(topic)
 
-    def add_topic_handler(self, topic, callback, consumer: str = "default"):
+    def add_topic_handler(self, topic: str, callback: Callable, consumer: str = "default"):
         self.topic_handler(topic, consumer)(callback)
 
     def _run(self):
@@ -82,5 +84,49 @@ class FlaskKafka(object):
             t.setDaemon(True)
             t.start()
 
-    def start(self):
+    def _start(self):
         self._run()
+
+    def start(self, lock: bool = True):
+        if not lock:
+            self._start()
+            return
+        self._start_with_lock()
+
+    def _start_with_lock(self):
+        """
+        Start the kafka consumer with a lock
+        :return:
+        """
+        lock_file_path = os.path.join(os.getcwd(), "flask_kafka.lock")
+        if platform.system() != 'Windows':
+            fcntl = __import__("fcntl")
+            f = open(lock_file_path, 'wb')
+            try:
+                fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                self._start()
+            except:
+                pass
+
+            def unlock():
+                fcntl.flock(f, fcntl.LOCK_UN)
+                f.close()
+
+            atexit.register(unlock)
+        else:
+            msvcrt = __import__('msvcrt')
+            f = open(lock_file_path, 'wb')
+            try:
+                msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+                self._start()
+            except:
+                pass
+
+            def _unlock_file():
+                try:
+                    f.seek(0)
+                    msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+                except:
+                    pass
+
+            atexit.register(_unlock_file)
