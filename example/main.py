@@ -21,7 +21,7 @@ kfk.init_app(app)
 
 @app.route("/", methods=["get"])
 def index():
-    return "hello world! ----1"
+    return "hello world!"
 
 
 @kfk.topic_handler('kafka_demo')
@@ -31,6 +31,12 @@ def test_topic_handler(consumer, msg):
 
 # or
 # kfk.add_topic_handler("kafka_demo", lambda con, msg: print(msg))
+
+@app.route("/index", methods=["get"])
+def index_producer():
+    pd = kfk.get_producer()
+    pd.send("topic", value="")
+    return "hello index!"
 
 
 if __name__ == '__main__':

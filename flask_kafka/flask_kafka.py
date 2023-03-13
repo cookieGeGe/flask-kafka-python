@@ -39,10 +39,10 @@ class FlaskKafka(object):
             self.create_consumer(name, **config)
             self.create_producer(name, **config)
 
-    def get_consumer(self, consumer_name: str = "default"):
+    def get_consumer(self, consumer_name: str = "default") -> KafkaConsumer:
         return self._consumers.get(consumer_name, None)
 
-    def get_producer(self, producer_name: str = "default"):
+    def get_producer(self, producer_name: str = "default") -> KafkaProducer:
         return self._producers.get(producer_name, None)
 
     def add_consumer(self, consumer_name: str, consumer: KafkaConsumer):

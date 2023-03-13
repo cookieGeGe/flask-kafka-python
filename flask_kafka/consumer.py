@@ -18,8 +18,6 @@ class KafkaConsumer(object):
         self._consumer = _KafkaConsumer(**config)
 
     def __getattr__(self, item: str):
-        if hasattr(self, item):
-            return getattr(self, item)
         return getattr(self._consumer, item)
 
     def _add_handler(self, topic: str, handler: Callable):

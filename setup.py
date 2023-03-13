@@ -13,7 +13,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='flask-kafka-python',
-    version='0.0.1',
+    version='0.0.2',
     packages=['flask_kafka'],
     install_requires=['kafka-python'],
     license='MIT',
