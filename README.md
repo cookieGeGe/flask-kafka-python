@@ -37,7 +37,7 @@ bus.init_app(app)
 
 @app.route("/", methods=["get"])
 def index():
-    return "hello world! ----1"
+    return "hello world!"
 
 
 @bus.topic_handler('kafka_demo')
@@ -54,6 +54,14 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 ```
+
+## Configuration
+
+Description of configuration items
+- `KAFKA_LOCK_FILE` specifies the lock file path, The default is flask_kafka.lock in the running directory.
+- `KAFKA_CONFIG` default kafka configuration, `dict` 
+- `KAFKA_BINDS` Kafka configuration with an additional specified name (similar to sqlalchemy's binds), `dict`, key is an alias of kafka, value is kafka configuration dictionary
+
 
 
 ## License

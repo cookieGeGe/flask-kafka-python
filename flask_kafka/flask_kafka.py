@@ -98,7 +98,11 @@ class FlaskKafka(object):
         Start the kafka consumer with a lock
         :return:
         """
-        lock_file_path = os.path.join(os.getcwd(), "flask_kafka.lock")
+        default_lock_file_path = os.path.join(os.getcwd(), "flask_kafka.lock")
+        lock_file_path = self.app.config.setdefault("KAFKA_LOCK_FILE", default_lock_file_path)
+        dir_path = os.path.dirname(lock_file_path)
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
         if platform.system() != 'Windows':
             fcntl = __import__("fcntl")
             f = open(lock_file_path, 'wb')
