@@ -19,7 +19,7 @@ setup(
     license='MIT',
     description='Make it easier to integrate flask with kafka',
     author='cookieGeGe',
-    author_email='nimzy.maina@gmail.com',
+    author_email='zhang1114570651@gmail.com',
     keywords=['kafka', 'consumer', 'kafkaesque', 'flask', 'simple', 'consumer', 'flask style', 'decorator'],
     long_description=long_description,
     long_description_content_type="text/markdown",
